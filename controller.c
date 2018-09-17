@@ -72,6 +72,11 @@ int main(int argc, char *argv[]) {
       c = c + LIN_LEN ;
     }
     */
+	 i = 0;
+	while( i < MAXLINES*LIN_LEN ){
+		printf("%c", bufferin[i]);
+		i++;	
+	}
 
     toc_c = current_timestamp();
 
@@ -84,9 +89,19 @@ int main(int argc, char *argv[]) {
 
     tic_asm = current_timestamp();
 
+	
+
     /* Assembly inline:
     Inserite qui il vostro blocco di codice assembly inline o richiamo a funzioni assembly.
     Il blocco di codice prende come input 'bufferin' e deve restituire una variabile stringa 'bufferout_asm' che verrà poi salvata su file. */
+
+	__asm__("movl $0, %%eax; movl $1, %%ebx;"
+		
+		"movl $0, %%ecx; xorl %%eax, %%eax; movl $4, %%eax; movl $1, %%ebx; movl $1, %%edx; int $0x80;"
+		:"=m" (bufferin)
+		:"m" (bufferout_asm)
+		);
+		
 
     toc_asm = current_timestamp();
 
