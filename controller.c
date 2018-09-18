@@ -8,6 +8,8 @@
 
 /* Inserite eventuali extern modules qui */
 
+extern void leggi(char out[], char in[]);
+
 /* ************************************* */
 
 enum { MAXLINES = 400 };
@@ -95,12 +97,8 @@ int main(int argc, char *argv[]) {
     Inserite qui il vostro blocco di codice assembly inline o richiamo a funzioni assembly.
     Il blocco di codice prende come input 'bufferin' e deve restituire una variabile stringa 'bufferout_asm' che verrà poi salvata su file. */
 
-	__asm__("movl $0, %%eax; movl $1, %%ebx;"
-		
-		"movl $0, %%ecx; xorl %%eax, %%eax; movl $4, %%eax; movl $1, %%ebx; movl $1, %%edx; int $0x80;"
-		:"=m" (bufferin)
-		:"m" (bufferout_asm)
-		);
+	
+	leggi(bufferin,bufferout_asm);
 		
 
     toc_asm = current_timestamp();
