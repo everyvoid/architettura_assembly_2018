@@ -73,12 +73,12 @@ int main(int argc, char *argv[]) {
       strcat( bufferout_asm, tmpout);
       c = c + LIN_LEN ;
     }
-    */
+    
 	 i = 0;
 	while( i < MAXLINES*LIN_LEN ){
 		printf("%c", bufferin[i]);
 		i++;	
-	}
+	}*/
 
     toc_c = current_timestamp();
 
