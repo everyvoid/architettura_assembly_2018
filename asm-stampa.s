@@ -51,88 +51,122 @@ leggi:
 elabora:
 
 	cmpb $0, int_gen  #se int_gen è a 0 controllo res_gen
-	jne intW
+	jne intD
 
 	cmpb $0x30, (%esi)
 	je all_off
-	jmp all_on #aumentare di 4 esi
+	# jmp all_on aumentare di 4 esi
 
 intG_W_D:
   movb $1, int_gen
   movb $1, int_wm
   movb $1, int_dw
+  movb $0, ciclo
+  jmp calcola
 
-intW: #controllo int_wm
+intD: #controllo int_wm
+
+	cmpb $0, int_dw
+	jne intW
+
+	cmpb $0x30, 2(%esi)
+	je intW
+	movb $1, int_dw
+
+
+intW:
 
 	cmpb $0, int_wm
-	jne intD
-
+	jne calcola #inizio a calcolare
+	
 	cmpb $0x30, 1(%esi)
-	je intD
+	je calcola
 	movb $1, int_wm
 
 
-intD:
-
-	cmpb $0, int_dw
-	jne calcola #inizio a calcolare
-	
-	cmpb $0x30, 2(%esi)
-	je calcola
-	movb $1, int_dw
-	jmp calcola
-
-	
-sum1:
-	addl $2000, (%eax)
-sum2:
-	addl $300, (%eax)
-sum3:
-	addl $1200, (%eax)
-sum4:
-	addl $1000, (%eax)
-sum5:
-	addl $1800, (%eax)
-sum6:
-	addl $240, (%eax)
-sum7:
-	addl $400, (%eax)
-sum8:
-	addl $200, (%eax)
-
-
 calcola:
+  leal somma, %eax
+  
+  cmp1:
+    cmpb $0x31, 4(%esi)
+    jne cmp2	
+  
+  sum1:
+	  addl $2000, (%eax)
+  
+  cmp2:
+    cmpb $0x31, 5(%esi)
+    jne cmp3
 
-	leal somma , %eax
+  sum2:
+	  addl $300, (%eax)
+  
+  cmp3:
+    cmpb $0x31, 6(%esi)
+    jne cmp4
 
-	cmpb $0x31, 4(%esi)
-	je sum1
-	cmpb $0x31, 5(%esi)
-	je sum2
-	cmpb $0x31, 6(%esi)
-	je sum3
-	cmpb $0x31, 7(%esi)
-	je sum4
-	movb 8(%esi), %bl
-	andb int_wm, %bl
-  cmpb $1, %bl
-	je sum1
-	xorl %ebx, %ebx
-	movb 9(%esi), %bl
-	andb int_dw, %bl
-  cmpb $1, %bl
-	je sum5
-	xorl %ebx, %ebx
-	cmpb $0x31, 10(%esi)
-	je sum6
-	cmpb $0x31, 11(%esi)
-	je sum7
-	cmpb $0x31, 12(%esi)
-	je sum8
-	cmpb $0x31, 13(%esi)
-	je sum7
+  sum3:
+	  addl $1200, (%eax)
+
+  cmp4:
+    cmpb $0x31, 7(%esi)
+    jne cmp5
+
+  sum4:
+	  addl $1000, (%eax)
+
+  cmp5:
+    movb 8(%esi), %bl
+	  andb int_dw, %bl
+    cmpb $1, %bl
+	  je sum5
+    jne cmp6
+	  xorl %ebx, %ebx
+	
+  sum5:
+	  addl $2000, (%eax)
+
+  cmp6:
+    movb 9(%esi), %bl
+	  andb int_wm, %bl
+    cmpb $1, %bl
+	  je sum6
+    jne cmp7
+	  xorl %ebx, %ebx
+	
+  sum6:
+	  addl $1800, (%eax)
+
+  cmp7:
+    cmpb $0x31, 10(%esi)
+    jne cmp8
+
+  sum7:
+	  addl $240, (%eax)
+
+  cmp8:
+    cmpb $0x31, 11(%esi)
+    jne cmp9
+
+  sum8:
+	  addl $400, (%eax)
+
+  cmp9:
+    cmpb $0x31, 12(%esi)
+    jne cmp10
+
+  sum9:
+	  addl $200, (%eax)
+
+  cmp10:
+    cmpb $0x31, 13(%esi)
+    jne soglia_func
+
+  sum10:
+	  addl $400, (%eax)
 
 
+/* controllo soglia */
 soglia_func:
 	xorl %eax, %eax
 	cmpl $4500, somma
@@ -148,6 +182,7 @@ soglia_func:
 	jmp salva
 
 
+/* set OL */
 overload:
 	movl $3, soglia
 	incb ciclo
@@ -159,13 +194,15 @@ overload:
 	je sys_goes_off
 	jmp salva
 	
-	
+
+/* set fascia 3 */	
 stato_2:
 	movb $0, ciclo
 	movb $2, soglia
 	jmp salva
 
 
+/* set fascia 2 */
 stato_1:
 	movb $0, ciclo
 	movb $1, soglia
@@ -229,13 +266,13 @@ all_off:
   jmp ricomincia
 
 
-/* scrive int_wm OFF */
+/* so che int_wm OFF */
 off_wm:
 	cmpb $0, int_dw
 	je off_wm_dw
 	movb $0x31, (%edi)
-	movb $0x30, 1(%edi)
-	movb $0x31, 2(%edi)
+	movb $0x30, 2(%edi)
+	movb $0x31, 1(%edi)
 	movb $0x2D, 3(%edi)
 	cmpb $3, soglia
 	jne soglia_2
@@ -248,8 +285,8 @@ off_wm:
 /* scrive int_dw OFF */
 off_dw:
 	movb $0x31, (%edi)
-	movb $0x31, 1(%edi)
-	movb $0x30, 2(%edi)
+	movb $0x31, 2(%edi)
+	movb $0x30, 1(%edi)
 	movb $0x2D, 3(%edi)
 	cmpb $3, soglia
 	jne soglia_2
